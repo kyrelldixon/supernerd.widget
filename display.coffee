@@ -24,10 +24,13 @@ commands =
   hdd : "df -hl | awk '{s+=$5} END {print s \"%\"}'"
   date  : "date +\"%a %d %b\""
   focus : "/usr/local/bin/chunkc tiling::query --window name"
-  playing: "osascript -e 'tell application \"iTunes\" to if player state is playing then artist of current track & \" - \" & name of current track'"
   ismuted : "osascript -e 'output muted of (get volume settings)'"
   ischarging : "sh ./supernerd.widget/scripts/ischarging.sh"
   activedesk : "echo $(/usr/local/bin/chunkc tiling::query -d id)"
+  isitunesplaying: "osascript -e 'tell application \"iTunes\" to if player state is playing then return true'"
+  isspotifyrunning : "osascript -e 'if application \"Spotify\" is running then return true'"
+  itunes : "osascript -e 'tell application \"iTunes\" to if player state is playing then artist of current track & \" - \" & name of current track'"
+  spotify : "osascript -e 'if application \"Spotify\" is running then tell application \"Spotify\" to artist of current track & \" - \" & name of current track '"
 #
 # ─── COLORS ─────────────────────────────────────────────────────────────────
 #
@@ -74,10 +77,13 @@ command: "echo " +
          "$(#{ commands.hdd }):::" +
          "$(#{ commands.date }):::" +
          "$(#{ commands.focus }):::" +
-         "$(#{ commands.playing }):::" +
          "$(#{ commands.ismuted }):::" +
          "$(#{ commands.ischarging }):::" +
-         "$(#{ commands.activedesk }):::"
+         "$(#{ commands.activedesk }):::" +
+         "$(#{ commands.isitunesplaying}):::" +
+         "$(#{ commands.isspotifyrunning}):::" +
+         "$(#{ commands.itunes}):::" +
+         "$(#{ commands.spotify}):::"
 
 
 #
@@ -158,7 +164,7 @@ render: ( ) ->
       </div>
       <div class="widg" id="editor">
         <i class="far fa-code"></i>
-        atom
+        vscode
       </div>
     </div>
 
@@ -207,10 +213,13 @@ update: ( output, domEl ) ->
   hdd = output[ 6 ]
   date = output[ 7 ]
   focus = output[ 8 ]
-  playing = output[ 9 ]
-  ismuted = output[ 10 ]
-  ischarging = output[ 11 ]
-  activedesk = output[ 12 ]
+  ismuted = output[ 9 ]
+  ischarging = output[ 10 ]
+  activedesk = output[ 11 ]
+  isitunesplaying = output[ 12 ]
+  isspotifyrunning = output[ 13 ]
+  itunes = output[ 14 ]
+  spotify = output[ 15 ]
 
   # Focus
   focus = focus.split( / /g )[ 0 ]
@@ -218,7 +227,13 @@ update: ( output, domEl ) ->
 
   div = $(domEl)
 
-  $( ".playing" )    .text( "#{ playing }" )
+  if isspotifyrunning && not isitunesplaying
+    $( ".playing" )    .text( "#{ spotify }" )
+  else if isitunesplaying && not isspotifyrunning
+    $( ".playing" )    .text( "#{ itunes }" )
+  else if isitunesplaying && isspotifyrunning
+    $( ".playing" )    .text( "iTunes and Spotify Playing. Close One music player" )
+  
   $( ".time-output" )    .text( "#{ time }" )
   $( ".date-output" )    .text( "#{ date }" )
   $( ".battery-output") .text("#{ battery }")
@@ -262,6 +277,7 @@ handleBattery: ( domEl, percentage, ischarging ) ->
   if ischarging == "true"
     batteryIcon = "fas fa-bolt"
   $( ".battery-icon" ).html( "<i class=\"fa #{ batteryIcon }\"></i>" )
+
 #
 # ─── HANDLE VOLUME ─────────────────────────────────────────────────────────
 #
@@ -287,9 +303,10 @@ handleVolume: ( volume, ismuted ) ->
 afterRender: (domEl) ->
     $(domEl).on 'click', '#music', => @run "open /Applications/iTunes.app"
     $(domEl).on 'click', '#home', => @run "open ~"
-    $(domEl).on 'click', '#browser', => @run "open /Applications/Safari.app"
-    $(domEl).on 'click', '#mail', => @run "open /Applications/Mail.app"
-    $(domEl).on 'click', '#messages', => @run "open /Applications/WhatsApp.app"
+    $(domEl).on 'click', '#browser', => @run "open /Applications/Firefox.app"
+    $(domEl).on 'click', '#mail', => @run "open /Applications/Airmail\\ 3.app"
+    $(domEl).on 'click', '#messages', => @run "open /Applications/Messages.app"
+    $(domEl).on 'click', '#editor', => @run "open /Applications/Visual\\ Studio\\ Code.app"
 
 # ──────────────────────────────────────────────────────────────────────────────
 #
