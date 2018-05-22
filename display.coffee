@@ -28,7 +28,7 @@ commands =
   ischarging : "sh ./supernerd.widget/scripts/ischarging.sh"
   activedesk : "echo $(/usr/local/bin/chunkc tiling::query -d id)"
   isitunesplaying: "osascript -e 'tell application \"iTunes\" to if player state is playing then return true'"
-  isspotifyrunning : "osascript -e 'if application \"Spotify\" is running then return true'"
+  isspotifyplaying : "osascript -e 'tell application \"Spotify\" to if player state is playing then return true'"
   itunes : "osascript -e 'tell application \"iTunes\" to if player state is playing then artist of current track & \" - \" & name of current track'"
   spotify : "osascript -e 'if application \"Spotify\" is running then tell application \"Spotify\" to artist of current track & \" - \" & name of current track '"
 #
@@ -81,7 +81,7 @@ command: "echo " +
          "$(#{ commands.ischarging }):::" +
          "$(#{ commands.activedesk }):::" +
          "$(#{ commands.isitunesplaying}):::" +
-         "$(#{ commands.isspotifyrunning}):::" +
+         "$(#{ commands.isspotifyplaying}):::" +
          "$(#{ commands.itunes}):::" +
          "$(#{ commands.spotify}):::"
 
@@ -217,7 +217,7 @@ update: ( output, domEl ) ->
   ischarging = output[ 10 ]
   activedesk = output[ 11 ]
   isitunesplaying = output[ 12 ]
-  isspotifyrunning = output[ 13 ]
+  isspotifyplaying = output[ 13 ]
   itunes = output[ 14 ]
   spotify = output[ 15 ]
 
@@ -227,11 +227,13 @@ update: ( output, domEl ) ->
 
   div = $(domEl)
 
-  if isspotifyrunning && not isitunesplaying
+  if isspotifyplaying && not isitunesplaying
     $( ".playing" )    .text( "#{ spotify }" )
-  else if isitunesplaying && not isspotifyrunning
+    $(domEl).on 'click', '#music', => @run "open /Applications/Spotify.app"
+  else if isitunesplaying && not isspotifyplaying
     $( ".playing" )    .text( "#{ itunes }" )
-  else if isitunesplaying && isspotifyrunning
+    $(domEl).on 'click', '#music', => @run "open /Applications/iTunes.app"
+  else if isitunesplaying && isspotifyplaying
     $( ".playing" )    .text( "iTunes and Spotify Playing. Close One music player" )
   
   $( ".time-output" )    .text( "#{ time }" )
@@ -301,7 +303,6 @@ handleVolume: ( volume, ismuted ) ->
 # ─── HANDLE CLICKS ────────────────────────────────────────────────────────
 #
 afterRender: (domEl) ->
-    $(domEl).on 'click', '#music', => @run "open /Applications/iTunes.app"
     $(domEl).on 'click', '#home', => @run "open ~"
     $(domEl).on 'click', '#browser', => @run "open /Applications/Firefox.app"
     $(domEl).on 'click', '#mail', => @run "open /Applications/Airmail\\ 3.app"
