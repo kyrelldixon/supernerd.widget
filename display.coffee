@@ -160,7 +160,7 @@ render: ( ) ->
       </div>
       <div class="widg" id="terminal">
         <i class="far fa-terminal"></i>
-        zsh
+        iterm
       </div>
       <div class="widg" id="editor">
         <i class="far fa-code"></i>
@@ -307,6 +307,7 @@ afterRender: (domEl) ->
     $(domEl).on 'click', '#mail', => @run "open /Applications/Airmail\\ 3.app"
     $(domEl).on 'click', '#messages', => @run "open /Applications/Messages.app"
     $(domEl).on 'click', '#editor', => @run "open /Applications/Visual\\ Studio\\ Code.app"
+    $(domEl).on 'click', '#terminal', => @run "open ~/Applications/iTerm.app"
 
 # ──────────────────────────────────────────────────────────────────────────────
 #
